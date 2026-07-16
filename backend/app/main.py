@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import auth, tasks
+from .routers import auth, tasks, users
 from .database import Base, engine
 
 # Creates tables on startup if they don't exist.
@@ -16,6 +16,7 @@ origins = [
 
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(users.router)
 
 app.add_middleware(
     CORSMiddleware,
