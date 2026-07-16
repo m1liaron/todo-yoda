@@ -52,3 +52,10 @@ class TaskOut(TaskBase):
 
     class Config:
         from_attributes = True
+
+
+
+class TaskListResponse(BaseModel):
+    data: list[TaskOut]
+    has_more_pages: bool
+    page_number: int
