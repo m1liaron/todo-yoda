@@ -1,13 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Swap for e.g. "postgresql://user:pass@localhost/dbname" in production
 from .config import settings
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False},  # only needed for SQLite
-)
+# connect_args is only needed for SQLite; drop it for Postgres/MySQL urls
+connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+
+engine = create_engine(settings.database_url, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
