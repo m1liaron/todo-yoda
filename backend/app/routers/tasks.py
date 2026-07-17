@@ -39,13 +39,13 @@ def create_task(
     return task
 
 
-@router.get("/", response_model=List[schemas.TaskListResponse])
+@router.get("/", response_model=schemas.TaskListResponse)
 def list_tasks(
-    page: int = Query(1, get=1, description="1-indexed page number"),
+    page: int = Query(1, ge=1, description="1-indexed page number"),
     status_filter: Optional[bool] = Query(
-        None, alisa="status", description="Filter by done status"
+        None, alias="status", description="Filter by done status"
     ),
-    sort: str = Query("id", description="Task field to sort by, e.g title, priority, id"),
+    sort: str = Query("id", description="Task field to sort by, e.g. title, priority, id"),
     sortOrder: Literal["asc", "desc"] = Query("asc"),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),

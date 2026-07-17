@@ -1,3 +1,6 @@
+import { StatusCodes } from "http-status-codes";
+import { clearToken, getToken } from "./auth";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export type User = {
@@ -25,6 +28,22 @@ export type TaskInput = {
   priority?: number;
 };
 
+export type TaskSortField = "id" | "title" | "priority" | "done";
+export type SortOrder = "asc" | "desc";
+
+export type TaskListParams = {
+  page?: number;
+  status?: boolean;
+  sort?: TaskSortField;
+  sortOrder?: SortOrder;
+};
+
+export type TaskListResponse = {
+  data: Task[];
+  has_more_pages: boolean;
+  page_number: number;
+};
+
 class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -36,8 +55,8 @@ class ApiError extends Error {
 async function request<T>(
   path: string,
   options: RequestInit = {},
-  token?: string
 ): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
@@ -47,7 +66,12 @@ async function request<T>(
     },
   });
 
+  
   if (!res.ok) {
+    if (res.status === StatusCodes.UNAUTHORIZED) {
+      clearToken();
+    }
+
     let detail = res.statusText;
     try {
       const body = await res.json();
@@ -66,7 +90,7 @@ async function request<T>(
 }
 
 export const usersApi = {
-  getMe: (token: string) => request<User>('/users/me', {}, token),
+  getMe: () => request<User>('/users/me', {}),
 };
 
 export const authApi = {
@@ -84,24 +108,31 @@ export const authApi = {
 };
 
 export const tasksApi = {
-  list: (token: string) => request<Task[]>('/tasks/', {}, token),
+  list: (params: TaskListParams = {}) => {
+    const search = new URLSearchParams();
+    if (params.page !== undefined) search.set("page", String(params.page));
+    if (params.status !== undefined) search.set("status", String(params.status));
+    if (params.sort !== undefined) search.set("sort", params.sort);
+    if (params.sortOrder !== undefined) search.set("sortOrder", params.sortOrder);
 
-  create: (token: string, input: TaskInput) =>
+    const qs = search.toString();
+    return request<TaskListResponse>(`/tasks/${qs ? `?${qs}` : ""}`, {});
+  },
+
+  create: (input: TaskInput) =>
     request<Task>(
       '/tasks/',
-      { method: 'POST', body: JSON.stringify(input) },
-      token
+      { method: 'POST', body: JSON.stringify(input) }
     ),
 
-  update: (token: string, id: number, input: Partial<TaskInput>) =>
+  update: (id: number, input: Partial<TaskInput>) =>
     request<Task>(
       `/tasks/${id}`,
-      { method: 'PUT', body: JSON.stringify(input) },
-      token
+      { method: 'PUT', body: JSON.stringify(input) }
     ),
 
-  remove: (token: string, id: number) =>
-    request<void>(`/tasks/${id}`, { method: 'DELETE' }, token),
+  remove: (id: number) =>
+    request<void>(`/tasks/${id}`, { method: 'DELETE' }),
 };
 
 export { ApiError };

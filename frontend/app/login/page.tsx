@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 
 import { authApi, ApiError } from '@/lib/api';
-import { saveToken } from '@/lib/auth';
+import { setToken } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,8 +32,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { access_token } = await authApi.login(email, password);
-      saveToken(access_token);
-      router.push('/todos');
+      setToken(access_token);
+      router.push('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
     } finally {
