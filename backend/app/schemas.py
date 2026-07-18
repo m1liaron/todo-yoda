@@ -59,3 +59,20 @@ class TaskListResponse(BaseModel):
     data: list[TaskOut]
     has_more_pages: bool
     page_number: int
+
+# ---------- Category ----------
+class CategoryBase(BaseModel):
+    title: str
+ 
+class CategoryCreate(CategoryBase):
+    pass
+ 
+class CategoryUpdate(BaseModel):
+    title: Optional[str] = None
+ 
+class CategoryOut(CategoryBase):
+    id: int
+    owner_id: int
+ 
+    class Config:
+        from_attributes = True
