@@ -1,4 +1,5 @@
-from typing import List, Literal, Optional
+from datetime import date
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -47,6 +48,12 @@ def list_tasks(
     ),
     sort: str = Query("id", description="Task field to sort by, e.g. title, priority, id"),
     sortOrder: Literal["asc", "desc"] = Query("asc"),
+    startDate: Optional[date] = Query(
+        None, description="Only return tasks with due_date >= this date (YYYY-MM-DD)"
+    ),
+    endDate: Optional[date] = Query(
+        None, description="Only return tasks with due_date <= this date (YYYY-MM-DD)"
+    ),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -60,6 +67,12 @@ def list_tasks(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Invalid sort field '{sort}'. Must be one of: {sorted(SORTABLE_FIELDS)}",
         )
+    
+    if startDate is not None:
+        query = query.filter(models.Task.created_at >= startDate)
+
+    if endDate is not None:
+        query = query.filter(models.Task.created_at <= endDate)
 
 
     sort_column = getattr(models.Task, sort)

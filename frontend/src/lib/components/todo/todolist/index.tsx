@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2, Check, X, Pencil } from 'lucide-react';
+import { Trash2, Check, X, Pencil, CalendarDays } from 'lucide-react';
 
 import { Button } from '@/src/lib/components/ui/button';
 import { Input } from '@/src/lib/components/ui/input';
@@ -20,6 +20,10 @@ import { getToken, clearToken } from '@/src/lib/modules/storage/auth';
 import { SortOrder, Task, TaskSortField } from '@/src/lib/types/task';
 import { tasksApi } from '@/src/lib/modules/api';
 import { ApiError } from '@/src/lib/enums/exception/api-error';
+import { Popover, PopoverTrigger, PopoverContent } from "@/src/lib/components/ui/popover";
+import { Calendar } from "@/src/lib/components/ui/calendar";
+import { DateRange } from 'react-day-picker';
+import { SortableTaskRow } from '../../sortable-task-row';
 
 const PRIORITIES = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -32,6 +36,21 @@ const SORT_OPTIONS: { value: TaskSortField; label: string }[] = [
   { value: "done", label: "Status" },
 ];
 
+function toApiDate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+ 
+function formatRangeLabel(range: DateRange | undefined): string {
+  if (!range?.from) return "Due date";
+  if (!range.to) return toApiDate(range.from);
+  return `${toApiDate(range.from)} – ${toApiDate(range.to)}`;
+}
+
+
+
 export function TodoList() {
   const router = useRouter();
  
@@ -42,6 +61,7 @@ export function TodoList() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortField, setSortField] = useState<TaskSortField>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
  
   const [newTitle, setNewTitle] = useState("");
   const [newPriority, setNewPriority] = useState<string | null>("1");
@@ -65,6 +85,12 @@ export function TodoList() {
         status: statusParam(),
         sort: sortField,
         sortOrder,
+        startDate: dateRange?.from ? toApiDate(dateRange.from) : undefined,
+        endDate: dateRange?.to
+          ? toApiDate(dateRange.to)
+          : dateRange?.from
+            ? toApiDate(dateRange.from) // single day selected: treat as start=end
+            : undefined,
       });
       setTasks((prev) => (replace ? res.data : [...prev, ...res.data]));
       setPage(res.page_number);
@@ -87,7 +113,7 @@ export function TodoList() {
   useEffect(() => {
     fetchPage(1, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, sortField, sortOrder]);
+  }, [statusFilter, sortField, sortOrder, dateRange?.from, dateRange?.to]);
  
   function statusParam(): boolean | undefined {
     if (statusFilter === "active") return false;
@@ -205,49 +231,79 @@ export function TodoList() {
           <Button type="submit">Add</Button>
         </form>
  
-        <div className="flex gap-2">
-          <Select
-            value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as StatusFilter)}
-          >
-            <SelectTrigger className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
-            </SelectContent>
-          </Select>
- 
-          <Select
-            value={sortField}
-            onValueChange={(v) => setSortField(v as TaskSortField)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  Sort: {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
- 
-          <Select
-            value={sortOrder}
-            onValueChange={(v) => setSortOrder(v as SortOrder)}
-          >
-            <SelectTrigger className="w-24">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">Asc</SelectItem>
-              <SelectItem value="desc">Desc</SelectItem>
-            </SelectContent>
-          </Select>
+
+        <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as StatusFilter)}
+            >
+              <SelectTrigger className="w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+              </SelectContent>
+            </Select>
+  
+            <Select
+              value={sortField}
+              onValueChange={(v) => setSortField(v as TaskSortField)}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    Sort: {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+  
+            <Select
+              value={sortOrder}
+              onValueChange={(v) => setSortOrder(v as SortOrder)}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asc">Asc</SelectItem>
+                <SelectItem value="desc">Desc</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Popover>
+            <PopoverTrigger
+              render={<Button variant="outline" className="gap-2" />}
+            >
+              <CalendarDays className="h-4 w-4" />
+              {formatRangeLabel(dateRange)}
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={2}
+              />
+              {dateRange?.from && (
+                <div className="flex justify-end border-t p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDateRange(undefined)}
+                  >
+                    Clear dates
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
         </div>
  
         {error && <p className="text-sm text-destructive">{error}</p>}
@@ -261,65 +317,22 @@ export function TodoList() {
         ) : (
           <>
             <ul className="space-y-2">
-              {tasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center gap-2 rounded-md border p-2"
-                >
-                  <Checkbox
-                    checked={task.done}
-                    onCheckedChange={() => toggleDone(task)}
+              {tasks.map((task, index) => (
+                  <SortableTaskRow
+                    key={task.id}
+                    task={task}
+                    index={index}
+                    editingId={editingId}
+                    editingTitle={editingTitle}
+                    onEditingTitleChange={setEditingTitle}
+                    onToggleDone={toggleDone}
+                    onChangePriority={changePriority}
+                    onStartEdit={startEdit}
+                    onSaveEdit={saveEdit}
+                    onCancelEdit={() => setEditingId(null)}
+                    onRemove={handleRemove}
                   />
- 
-                  {editingId === task.id ? (
-                    <>
-                      <Input
-                        value={editingTitle}
-                        onChange={(e) => setEditingTitle(e.target.value)}
-                        className="h-8 flex-1"
-                        autoFocus
-                      />
-                      <Button size="icon" variant="ghost" onClick={() => saveEdit(task)}>
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => setEditingId(null)}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className={`flex-1 text-sm ${
-                          task.done ? "text-muted-foreground line-through" : ""
-                        }`}
-                      >
-                        {task.title}
-                      </span>
-                      <Select
-                        value={String(task.priority)}
-                        onValueChange={(v) => changePriority(task, v)}
-                      >
-                        <SelectTrigger className="h-8 w-16">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PRIORITIES.map((p) => (
-                            <SelectItem key={p} value={String(p)}>
-                              P{p}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button size="icon" variant="ghost" onClick={() => startEdit(task)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => handleRemove(task)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </li>
-              ))}
+                ))}
             </ul>
  
             {hasMorePages && (

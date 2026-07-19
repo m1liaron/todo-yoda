@@ -5,6 +5,8 @@ type TaskListParams = {
   status?: boolean;
   sort?: TaskSortField;
   sortOrder?: SortOrder;
+  startDate?: string;
+  endDate?: string;
 };
 
 export { type TaskListParams };

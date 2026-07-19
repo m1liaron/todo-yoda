@@ -27,6 +27,26 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user: UserOut
 
+# ---------- Category ----------
+ 
+class CategoryBase(BaseModel):
+    title: str
+ 
+ 
+class CategoryCreate(CategoryBase):
+    pass
+ 
+ 
+class CategoryUpdate(BaseModel):
+    title: Optional[str] = None
+ 
+ 
+class CategoryOut(CategoryBase):
+    id: int
+    owner_id: int
+ 
+    class Config:
+        from_attributes = True
 
 # ---------- Task ----------
 
@@ -49,6 +69,7 @@ class TaskUpdate(BaseModel):
 class TaskOut(TaskBase):
     id: int
     owner_id: int
+    categories: list[CategoryOut]
 
     class Config:
         from_attributes = True

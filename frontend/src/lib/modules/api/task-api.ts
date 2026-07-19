@@ -8,6 +8,8 @@ const tasksApi = {
     if (params.status !== undefined) search.set("status", String(params.status));
     if (params.sort !== undefined) search.set("sort", params.sort);
     if (params.sortOrder !== undefined) search.set("sortOrder", params.sortOrder);
+    if (params.startDate !== undefined) search.set("startDate", params.startDate);
+    if (params.endDate !== undefined) search.set("endDate", params.endDate);
 
     const qs = search.toString();
     return request<TaskListResponse>(`/tasks/${qs ? `?${qs}` : ""}`, {});
