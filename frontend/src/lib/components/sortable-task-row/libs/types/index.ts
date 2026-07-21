@@ -1,1 +1,1 @@
-export { type SortableTaskRowProps } from "./sortable-task-row-props.type";
+export { type SortableTaskRowProps } from './sortable-task-row-props.type';

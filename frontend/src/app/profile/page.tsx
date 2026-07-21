@@ -1,13 +1,18 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/src/lib/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
+import { Button } from '@/src/lib/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/src/lib/components/ui/card';
 import { ApiError } from '@/src/lib/enums/exception/api-error';
 import { usersApi } from '@/src/lib/modules/api';
-import { clearToken } from "@/src/lib/modules/storage/auth";
+import { clearToken } from '@/src/lib/modules/storage/auth';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,14 +27,14 @@ export default function ProfilePage() {
         if (err instanceof ApiError && err.status === 401) {
           clearToken();
         }
-        router.push("/login");
+        router.push('/login');
       })
       .finally(() => setLoading(false));
   }, [router]);
 
   function handleLogout() {
     clearToken();
-    router.push("/login");
+    router.push('/login');
   }
 
   return (

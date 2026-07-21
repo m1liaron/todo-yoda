@@ -1,4 +1,4 @@
-import { useSortable } from "@dnd-kit/react/sortable";
+import { useSortable } from '@dnd-kit/react/sortable';
 
 import {
   Select,
@@ -7,11 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/lib/components/ui/select';
-import { SortableTaskRowProps } from "./libs/types";
-import { Check, GripVertical, Pencil, Trash2, X } from "lucide-react";
-import { Checkbox } from "../ui/checkbox";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { SortableTaskRowProps } from './libs/types';
+import { Check, GripVertical, Pencil, Trash2, X } from 'lucide-react';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
 
 const PRIORITIES = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -35,14 +35,14 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
     index,
     disabled: editingId === task.id,
   });
- 
+
   const isEditing = editingId === task.id;
- 
+
   return (
     <li
       ref={ref}
       className={`flex items-center gap-2 rounded-md border p-2 bg-background ${
-        isDragging ? "opacity-50" : ""
+        isDragging ? 'opacity-50' : ''
       }`}
     >
       <button
@@ -54,9 +54,12 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
       >
         <GripVertical className="h-4 w-4" />
       </button>
- 
-      <Checkbox checked={task.done} onCheckedChange={() => onToggleDone(task)} />
- 
+
+      <Checkbox
+        checked={task.done}
+        onCheckedChange={() => onToggleDone(task)}
+      />
+
       {isEditing ? (
         <>
           <Input
@@ -76,7 +79,7 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
         <>
           <span
             className={`flex-1 text-sm ${
-              task.done ? "text-muted-foreground line-through" : ""
+              task.done ? 'text-muted-foreground line-through' : ''
             }`}
           >
             {task.title}
@@ -106,6 +109,6 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
       )}
     </li>
   );
-}
+};
 
 export { SortableTaskRow };

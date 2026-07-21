@@ -1,4 +1,4 @@
-import { TaskSortField, SortOrder } from "./index";
+import { TaskSortField, SortOrder } from './index';
 
 type TaskListParams = {
   page?: number;
