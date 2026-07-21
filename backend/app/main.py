@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers import auth, tasks, users, categories
 from .database import Base, engine
 
+from .config import settings
+
 # Creates tables on startup if they don't exist.
 # For real projects, prefer Alembic migrations instead.
 Base.metadata.create_all(bind=engine)
@@ -11,7 +13,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Task Manager API")
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    settings.client_url
 ]
 
 app.include_router(auth.router)
