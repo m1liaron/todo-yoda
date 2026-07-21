@@ -1,12 +1,9 @@
-import { StatusCodes } from "http-status-codes";
-import { clearToken, getToken } from "../storage/auth";
-import { API_URL } from "../../enums/constants/api-url";
-import { ApiError } from "../../enums/exception/api-error";
+import { StatusCodes } from 'http-status-codes';
+import { clearToken, getToken } from '../storage/auth';
+import { API_URL } from '../../enums/constants/api-url';
+import { ApiError } from '../../enums/exception/api-error';
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -16,7 +13,6 @@ async function request<T>(
       ...options.headers,
     },
   });
-
 
   if (!res.ok) {
     if (res.status === StatusCodes.UNAUTHORIZED) {

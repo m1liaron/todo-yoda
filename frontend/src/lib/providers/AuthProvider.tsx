@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   createContext,
@@ -6,13 +6,13 @@ import {
   useEffect,
   useState,
   ReactNode,
-} from "react";
-import { useRouter } from "next/navigation";
+} from 'react';
+import { useRouter } from 'next/navigation';
 
-import { getToken, setToken, clearToken } from "@/src/lib/modules/storage/auth";
-import { User } from "../types/user";
-import { authApi, usersApi } from "../modules/api";
-import { ApiError } from "../enums/exception/api-error";
+import { getToken, setToken, clearToken } from '@/src/lib/modules/storage/auth';
+import { User } from '../types/user';
+import { authApi, usersApi } from '../modules/api';
+import { ApiError } from '../enums/exception/api-error';
 
 type AuthContextType = {
   user: User | null;
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     clearToken();
     setUser(null);
-    router.replace("/login");
+    router.replace('/login');
   };
 
   const refreshUser = async () => {
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(response.access_token);
     setUser(response.user);
 
-    router.replace("/");
+    router.replace('/');
   };
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export function useAuth() {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
+    throw new Error('useAuth must be used inside AuthProvider');
   }
 
   return context;

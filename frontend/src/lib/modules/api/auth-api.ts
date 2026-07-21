@@ -1,6 +1,5 @@
-import { AuthResponse } from "../../types/auth";
-import { request } from "./api";
-
+import { AuthResponse } from '../../types/auth';
+import { request } from './api';
 
 const authApi = {
   register: (email: string, password: string) =>
