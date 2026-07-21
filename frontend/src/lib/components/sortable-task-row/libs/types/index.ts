@@ -1,0 +1,1 @@
+export { type SortableTaskRowProps } from "./sortable-task-row-props.type";
