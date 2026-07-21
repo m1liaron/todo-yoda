@@ -35,7 +35,13 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
 def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == credentials.email).first()
 
-    if not user or not verify_password(credentials.password, user.password):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not exist",
+        )
+
+    if not verify_password(credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
