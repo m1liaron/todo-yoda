@@ -12,6 +12,22 @@ import { Check, GripVertical, Pencil, Trash2, X } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { useState } from 'react';
+
+import { Plus, Tag } from 'lucide-react';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/src/lib/components/ui/dialog';
+
+import { Badge } from '@/src/lib/components/ui/badge';
+import { categoriesApi } from '../../modules/api/category-api';
+import { TaskCategoriesDialog } from './libs/components/task-categories-dialog/task-categories-dialog';
 
 const PRIORITIES = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -35,8 +51,15 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
     index,
     disabled: editingId === task.id,
   });
+  const [newCategory, setNewCategory] = useState('');
 
   const isEditing = editingId === task.id;
+
+  const handleAddCategory = () => {
+    if (newCategory.length >= 0) {
+      categoriesApi.create({ title: newCategory });
+    }
+  };
 
   return (
     <li
@@ -99,6 +122,13 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({
               ))}
             </SelectContent>
           </Select>
+
+          <TaskCategoriesDialog
+            taskId={task.id}
+            categories={task.categories}
+            onCategoriesChanged={() => {}}
+          />
+
           <Button size="icon" variant="ghost" onClick={() => onStartEdit(task)}>
             <Pencil className="h-4 w-4" />
           </Button>
